@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Music player custom colors
+				"music-dark": "#121212",
+				"music-dark-alt": "#181818",
+				"music-accent": "#9b87f5",
+				"music-accent-hover": "#7E69AB",
+				"music-text": "#FFFFFF",
+				"music-text-secondary": "#b3b3b3",
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -70,25 +78,35 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
+				},
+				'pulse-slow': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.5' }
+				},
+				'equalizer-bar': {
+					'0%, 100%': { height: '0.5rem' },
+					'50%': { height: '2rem' }
+				},
+				'rotate-center': {
+					'0%': { transform: 'rotate(0)' },
+					'100%': { transform: 'rotate(360deg)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-slow': 'pulse-slow 3s ease-in-out infinite',
+				'equalizer-1': 'equalizer-bar 1.2s ease-in-out infinite',
+				'equalizer-2': 'equalizer-bar 1.7s ease-in-out infinite',
+				'equalizer-3': 'equalizer-bar 1.5s ease-in-out infinite',
+				'equalizer-4': 'equalizer-bar 1.9s ease-in-out infinite',
+				'disc-spin': 'rotate-center 8s linear infinite'
 			}
 		}
 	},
