@@ -6,8 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import MusicPlayer from "./components/MusicPlayer";
-import { useState } from "react";
-import { Track } from "./services/musicService";
+import { useState, useEffect } from "react";
+import { Track, getAllTracks } from "./services/musicService";
 
 // Pages
 import Home from "./pages/Home";
@@ -21,8 +21,19 @@ const App = () => {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
 
+  useEffect(() => {
+    // Initialize tracks from the music service
+    const allTracks = getAllTracks();
+    setTracks(allTracks);
+  }, []);
+
   const handleTrackSelect = (track: Track) => {
     setCurrentTrack(track);
+    
+    // If this is a new online track, add it to the tracks list
+    if (!tracks.some(t => t.id === track.id)) {
+      setTracks(prev => [...prev, track]);
+    }
   };
 
   return (
@@ -35,7 +46,7 @@ const App = () => {
             <Sidebar />
             <main className="ml-64">
               <Routes>
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<Home onTrackSelect={handleTrackSelect} />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/library" element={<Library />} />
                 <Route path="*" element={<NotFound />} />
