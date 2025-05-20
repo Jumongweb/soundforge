@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
@@ -140,7 +139,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ currentTrack, tracks, onTrack
       />
       
       <div className="flex items-center justify-between max-w-7xl mx-auto">
-        <PlayerInfo track={currentTrack} />
+        <PlayerInfo 
+          track={currentTrack} 
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+        />
         
         <div className="flex flex-col items-center flex-1 max-w-xl px-4">
           <PlayerControls 

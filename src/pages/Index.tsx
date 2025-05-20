@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import MusicPlayer from '@/components/MusicPlayer';
@@ -23,6 +22,7 @@ const Index = () => {
   const [allGenres, setAllGenres] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [visualizerType, setVisualizerType] = useState<'bars' | 'wave' | 'circle'>('wave');
 
   useEffect(() => {
     // Load initial data
@@ -65,6 +65,13 @@ const Index = () => {
     setSelectedGenre(genre);
   };
 
+  const cycleVisualizerType = () => {
+    const types: ('bars' | 'wave' | 'circle')[] = ['bars', 'wave', 'circle'];
+    const currentIndex = types.indexOf(visualizerType);
+    const nextIndex = (currentIndex + 1) % types.length;
+    setVisualizerType(types[nextIndex]);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1e1e1e] to-music-dark text-white">
       <Sidebar className="z-30" />
@@ -73,7 +80,15 @@ const Index = () => {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold">MeloMix Player</h1>
-            <Visualizer isPlaying={isPlaying} />
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={cycleVisualizerType}
+                className="text-xs text-music-text-secondary hover:text-music-accent"
+              >
+                Change Style
+              </button>
+              <Visualizer isPlaying={isPlaying} type={visualizerType} />
+            </div>
           </div>
           
           <FeaturedSection 
