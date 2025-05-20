@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Bookmark, Home, ListMusic, Music, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -8,6 +9,12 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ className }) => {
+  const location = useLocation();
+  
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+  
   return (
     <div className={cn("w-64 fixed top-0 left-0 bottom-0 bg-black p-6 overflow-y-auto", className)}>
       <div className="flex items-center gap-2 mb-8">
@@ -18,22 +25,46 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       <nav className="mb-8">
         <ul className="space-y-3">
           <li>
-            <a href="#" className="flex items-center gap-3 text-white hover:text-music-accent transition-colors">
+            <Link 
+              to="/" 
+              className={cn(
+                "flex items-center gap-3 transition-colors",
+                isActive('/') 
+                  ? "text-music-accent" 
+                  : "text-music-text-secondary hover:text-white"
+              )}
+            >
               <Home className="h-5 w-5" />
               <span>Home</span>
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#" className="flex items-center gap-3 text-music-text-secondary hover:text-white transition-colors">
+            <Link 
+              to="/search" 
+              className={cn(
+                "flex items-center gap-3 transition-colors",
+                isActive('/search') 
+                  ? "text-music-accent" 
+                  : "text-music-text-secondary hover:text-white"
+              )}
+            >
               <Search className="h-5 w-5" />
               <span>Search</span>
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#" className="flex items-center gap-3 text-music-text-secondary hover:text-white transition-colors">
+            <Link 
+              to="/library" 
+              className={cn(
+                "flex items-center gap-3 transition-colors",
+                isActive('/library') 
+                  ? "text-music-accent" 
+                  : "text-music-text-secondary hover:text-white"
+              )}
+            >
               <ListMusic className="h-5 w-5" />
               <span>Your Library</span>
-            </a>
+            </Link>
           </li>
         </ul>
       </nav>

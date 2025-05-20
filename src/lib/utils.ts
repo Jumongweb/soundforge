@@ -32,3 +32,46 @@ export function getRandomColor(): string {
   
   return colors[Math.floor(Math.random() * colors.length)];
 }
+
+export function isTrackInLibrary(trackId: string): boolean {
+  const savedLibrary = localStorage.getItem('musicLibrary');
+  if (!savedLibrary) return false;
+  
+  try {
+    const libraryTrackIds = JSON.parse(savedLibrary) as string[];
+    return libraryTrackIds.includes(trackId);
+  } catch {
+    return false;
+  }
+}
+
+export function addTrackToLibrary(trackId: string): void {
+  const savedLibrary = localStorage.getItem('musicLibrary');
+  let libraryTrackIds: string[] = [];
+  
+  if (savedLibrary) {
+    try {
+      libraryTrackIds = JSON.parse(savedLibrary);
+    } catch (error) {
+      console.error('Failed to parse library:', error);
+    }
+  }
+  
+  if (!libraryTrackIds.includes(trackId)) {
+    libraryTrackIds.push(trackId);
+    localStorage.setItem('musicLibrary', JSON.stringify(libraryTrackIds));
+  }
+}
+
+export function removeTrackFromLibrary(trackId: string): void {
+  const savedLibrary = localStorage.getItem('musicLibrary');
+  if (!savedLibrary) return;
+  
+  try {
+    const libraryTrackIds = JSON.parse(savedLibrary) as string[];
+    const updatedIds = libraryTrackIds.filter(id => id !== trackId);
+    localStorage.setItem('musicLibrary', JSON.stringify(updatedIds));
+  } catch (error) {
+    console.error('Failed to remove from library:', error);
+  }
+}
