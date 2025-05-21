@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Search as SearchIcon, Download, Wifi } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import OnlineTrackList from '@/components/OnlineTrackList';
 import { useLibrary } from '@/hooks/useLibrary';
 import { useLocation } from 'react-router-dom';
+import { fetchJamendoTracks } from '@/services/jamendoService';
 
 interface SearchProps {
   onTrackSelect: (track: Track) => void;
@@ -96,14 +98,32 @@ const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
     setIsSearching(true);
     
     try {
-      // We'll always use sample tracks since the Jamendo API key is invalid
-      // in a real app, you'd want to use a valid API key
-      generateSampleTracks();
+      const jamendoTracks = await fetchJamendoTracks(searchQuery);
+      
+      if (jamendoTracks.length > 0) {
+        setOnlineTracks(jamendoTracks);
+        toast({
+          title: "Search complete",
+          description: `Found ${jamendoTracks.length} tracks for "${searchQuery}"`,
+        });
+      } else {
+        toast({
+          title: "No results found",
+          description: `No tracks found for "${searchQuery}". Showing sample tracks instead.`,
+        });
+        generateSampleTracks();
+      }
     } catch (error) {
       console.error('Error fetching music:', error);
+      toast({
+        title: "Error searching",
+        description: "There was an error searching for music. Showing sample tracks instead.",
+        variant: "destructive"
+      });
       generateSampleTracks();
     } finally {
       setIsSearching(false);
+      setActiveTab('online');
     }
   };
   
@@ -156,12 +176,6 @@ const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
     ];
     
     setOnlineTracks(sampleOnlineTracks);
-    setActiveTab('online');
-    
-    toast({
-      title: "Search complete",
-      description: `Found ${sampleOnlineTracks.length} tracks for "${searchQuery}"`,
-    });
   };
 
   const handleDownload = (track: Track) => {

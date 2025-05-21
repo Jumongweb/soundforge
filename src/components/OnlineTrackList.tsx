@@ -50,7 +50,7 @@ const OnlineTrackList: React.FC<OnlineTrackListProps> = ({
             <th className="pb-3 pl-4 w-12">#</th>
             <th className="pb-3 w-3/5">TITLE</th>
             <th className="pb-3">ALBUM</th>
-            <th className="pb-3">STREAM</th>
+            <th className="pb-3">GENRE</th>
             <th className="pb-3 pr-4 text-right">ACTION</th>
           </tr>
         </thead>
@@ -88,6 +88,9 @@ const OnlineTrackList: React.FC<OnlineTrackListProps> = ({
                       src={track.cover} 
                       alt={track.title} 
                       className="h-10 w-10 object-cover rounded-sm shadow-sm"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600';
+                      }}
                     />
                     <div>
                       <p className={`text-sm font-medium ${isCurrentTrack ? 'text-music-accent' : ''}`}>
@@ -97,11 +100,10 @@ const OnlineTrackList: React.FC<OnlineTrackListProps> = ({
                     </div>
                   </div>
                 </td>
-                <td className="py-3 text-sm text-music-text-secondary">{track.album}</td>
+                <td className="py-3 text-sm text-music-text-secondary">{track.album || 'Unknown Album'}</td>
                 <td className="py-3">
                   <Badge variant="outline" className="bg-[#333] text-xs font-normal">
-                    <Wifi className="w-3 h-3 mr-1" />
-                    Streaming
+                    {track.genre || 'Mixed'}
                   </Badge>
                 </td>
                 <td className="py-3 pr-4 text-right">
@@ -112,7 +114,7 @@ const OnlineTrackList: React.FC<OnlineTrackListProps> = ({
                     onClick={() => onDownload(track)}
                   >
                     <Download className="w-3 h-3 mr-1" />
-                    Download
+                    Add to Library
                   </Button>
                 </td>
               </tr>
