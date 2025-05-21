@@ -8,7 +8,7 @@ interface NotFoundProps {
   onTrackSelect?: (track: Track) => void; // Make onTrackSelect optional
 }
 
-const NotFound: React.FC<NotFoundProps> = () => {
+const NotFound: React.FC<NotFoundProps> = ({ onTrackSelect }) => {
   const navigate = useNavigate();
   
   return (

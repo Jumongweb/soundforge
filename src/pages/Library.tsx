@@ -9,7 +9,11 @@ import { useLibrary } from '@/hooks/useLibrary';
 import { useToast } from '@/components/ui/use-toast';
 import { Link } from 'react-router-dom';
 
-const Library = () => {
+interface LibraryProps {
+  onTrackSelect: (track: Track) => void;
+}
+
+const Library: React.FC<LibraryProps> = ({ onTrackSelect }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [library, setLibrary] = useState<Track[]>([]);
   const [filteredLibrary, setFilteredLibrary] = useState<Track[]>([]);
@@ -30,8 +34,20 @@ const Library = () => {
     
     if (savedLibrary) {
       try {
-        const libraryIds = JSON.parse(savedLibrary) as string[];
-        const libraryTracks = allTracks.filter(track => libraryIds.includes(track.id));
+        const parsed = JSON.parse(savedLibrary);
+        
+        let libraryTracks: Track[] = [];
+        
+        // Handle both formats
+        if (Array.isArray(parsed) && typeof parsed[0] === 'string') {
+          // Old format - array of IDs
+          const libraryIds = parsed as string[];
+          libraryTracks = allTracks.filter(track => libraryIds.includes(track.id));
+        } else if (Array.isArray(parsed)) {
+          // New format - array of Track objects
+          libraryTracks = parsed as Track[];
+        }
+        
         setLibrary(libraryTracks);
         setFilteredLibrary(libraryTracks);
       } catch (error) {
@@ -65,6 +81,7 @@ const Library = () => {
   const handleTrackSelect = (track: Track) => {
     setCurrentTrack(track);
     setIsPlaying(true);
+    onTrackSelect(track);
   };
   
   const handlePlayPause = () => {
@@ -129,6 +146,7 @@ const Library = () => {
               isPlaying={isPlaying}
               onTrackSelect={handleTrackSelect}
               onPlayPause={handlePlayPause}
+              rightAction={renderRemoveButton}
             />
           </>
         ) : (

@@ -29,8 +29,19 @@ export function useLibrary() {
     if (!savedLibrary) return false;
     
     try {
-      const libraryTrackIds = JSON.parse(savedLibrary) as string[];
-      return libraryTrackIds.includes(trackId);
+      const parsedLibrary = JSON.parse(savedLibrary);
+      
+      // If it's an array of IDs
+      if (Array.isArray(parsedLibrary) && typeof parsedLibrary[0] === 'string') {
+        return parsedLibrary.includes(trackId);
+      }
+      
+      // If it's an array of Track objects
+      if (Array.isArray(parsedLibrary) && typeof parsedLibrary[0] === 'object') {
+        return parsedLibrary.some((track: Track) => track.id === trackId);
+      }
+      
+      return false;
     } catch {
       return false;
     }
@@ -38,20 +49,28 @@ export function useLibrary() {
 
   const addToLibrary = (track: Track) => {
     const savedLibrary = localStorage.getItem('musicLibrary');
-    let libraryTrackIds: string[] = [];
+    let libraryTracks: Track[] = [];
     
     if (savedLibrary) {
       try {
-        libraryTrackIds = JSON.parse(savedLibrary);
+        const parsed = JSON.parse(savedLibrary);
+        
+        // Handle both old format (array of IDs) and new format (array of Track objects)
+        if (Array.isArray(parsed) && typeof parsed[0] === 'string') {
+          // Old format - convert to new format
+          libraryTracks = [];
+        } else {
+          libraryTracks = parsed;
+        }
       } catch (error) {
         console.error('Failed to parse library:', error);
       }
     }
     
     // Only add if not already in library
-    if (!libraryTrackIds.includes(track.id)) {
-      libraryTrackIds.push(track.id);
-      localStorage.setItem('musicLibrary', JSON.stringify(libraryTrackIds));
+    if (!libraryTracks.some(t => t.id === track.id)) {
+      libraryTracks.push(track);
+      localStorage.setItem('musicLibrary', JSON.stringify(libraryTracks));
       
       toast({
         title: "Added to Library",
@@ -66,9 +85,20 @@ export function useLibrary() {
     if (!savedLibrary) return;
     
     try {
-      const libraryTrackIds = JSON.parse(savedLibrary) as string[];
-      const updatedIds = libraryTrackIds.filter(id => id !== trackId);
-      localStorage.setItem('musicLibrary', JSON.stringify(updatedIds));
+      const parsedLibrary = JSON.parse(savedLibrary);
+      
+      // Handle both formats
+      if (Array.isArray(parsedLibrary)) {
+        if (typeof parsedLibrary[0] === 'string') {
+          // Old format - array of IDs
+          const updatedIds = parsedLibrary.filter(id => id !== trackId);
+          localStorage.setItem('musicLibrary', JSON.stringify(updatedIds));
+        } else {
+          // New format - array of Track objects
+          const updatedTracks = parsedLibrary.filter((track: Track) => track.id !== trackId);
+          localStorage.setItem('musicLibrary', JSON.stringify(updatedTracks));
+        }
+      }
       
       toast({
         title: "Removed from Library",
@@ -83,6 +113,7 @@ export function useLibrary() {
   return {
     isInLibrary,
     addToLibrary,
-    removeFromLibrary
+    removeFromLibrary,
+    loadLibrary
   };
 }

@@ -95,9 +95,49 @@ const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
     }
 
     setIsSearching(true);
-    // Simulate online search delay
-    setTimeout(() => {
-      // These would come from an external API in a real app
+    
+    try {
+      // Use Jamendo API to search for real music
+      // This API provides free music with appropriate licenses
+      const response = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=2c25212d&format=jsonpretty&limit=10&search=${encodeURIComponent(searchQuery)}&include=musicinfo`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch from music API');
+      }
+      
+      const data = await response.json();
+      
+      if (data.results && data.results.length > 0) {
+        const apiTracks: Track[] = data.results.map((track: any) => ({
+          id: `online-${track.id}`,
+          title: track.name,
+          artist: track.artist_name,
+          album: track.album_name || 'Unknown Album',
+          cover: track.image || 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600',
+          audio: track.audio,
+          duration: track.duration || 180,
+          tags: track.tags ? track.tags.split(' ') : ['online'],
+          genre: track.musicinfo?.tags?.genres?.[0]?.name || 'Mixed'
+        }));
+        
+        setOnlineTracks(apiTracks);
+        setActiveTab('online');
+        
+        toast({
+          title: "Online search complete",
+          description: `Found ${apiTracks.length} tracks for "${searchQuery}"`,
+        });
+      } else {
+        toast({
+          title: "No results found",
+          description: `No tracks found for "${searchQuery}". Try a different search term.`,
+        });
+        setOnlineTracks([]);
+      }
+    } catch (error) {
+      console.error('Error fetching music:', error);
+      
+      // Fallback to sample data if API fails
       const sampleOnlineTracks: Track[] = [
         {
           id: `online-1-${Date.now()}`,
@@ -136,30 +176,44 @@ const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
       
       setOnlineTracks(sampleOnlineTracks);
       setActiveTab('online');
-      setIsSearching(false);
       
       toast({
-        title: "Online search complete",
-        description: `Found ${sampleOnlineTracks.length} tracks for "${searchQuery}"`,
+        title: "Using sample tracks",
+        description: "We couldn't connect to the music service, showing sample tracks instead",
       });
-    }, 1500);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleDownload = (track: Track) => {
-    // Simulate download process
+    // Add the track to library
+    addToLibrary(track);
+    
+    // Show download toast
     toast({
-      title: "Downloading...",
-      description: `${track.title} is being downloaded`
+      title: "Download complete",
+      description: `${track.title} has been added to your library`,
+      duration: 3000
     });
     
-    // Simulate completion after delay
+    // Update the local tracks list to include this track
+    setTracks(prev => {
+      // Only add if not already in the list
+      if (!prev.some(t => t.id === track.id)) {
+        return [...prev, track];
+      }
+      return prev;
+    });
+    
+    // Switch to local tab to show the newly added track
     setTimeout(() => {
-      addToLibrary(track);
-      toast({
-        title: "Download complete",
-        description: `${track.title} has been added to your library`
-      });
-    }, 2000);
+      setActiveTab('local');
+      
+      // Filter tracks to show the newly added one
+      const searchTerm = track.title.split(' ')[0];
+      setSearchQuery(searchTerm);
+    }, 1500);
   };
 
   return (
