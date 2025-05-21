@@ -32,7 +32,6 @@ const Home: React.FC<HomeProps> = ({ onTrackSelect }) => {
         <h1 className="text-3xl font-bold mb-6">Welcome to MusicMix</h1>
         
         <FeaturedSection 
-          title="Featured Tracks" 
           tracks={featuredTracks}
           onTrackSelect={handleTrackSelect}
         />

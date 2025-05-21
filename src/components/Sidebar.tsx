@@ -3,6 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Bookmark, Home, ListMusic, Music, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePlaylists } from '@/hooks/usePlaylists';
 
 interface SidebarProps {
   className?: string;
@@ -10,9 +11,14 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const location = useLocation();
+  const { playlists } = usePlaylists();
   
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+  
+  const isPlaylistActive = (playlistId: string) => {
+    return location.pathname === `/playlist/${playlistId}`;
   };
   
   return (
@@ -72,31 +78,21 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       <div className="mb-6">
         <h2 className="text-sm font-bold mb-4 text-music-text-secondary uppercase">Playlists</h2>
         <ul className="space-y-2">
-          <li>
-            <a href="#" className="text-music-text-secondary hover:text-white text-sm transition-colors">
-              Your Top Songs 2023
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-music-text-secondary hover:text-white text-sm transition-colors">
-              Workout Mix
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-music-text-secondary hover:text-white text-sm transition-colors">
-              Chill Vibes
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-music-text-secondary hover:text-white text-sm transition-colors">
-              Focus Flow
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-music-text-secondary hover:text-white text-sm transition-colors">
-              Road Trip
-            </a>
-          </li>
+          {playlists.map(playlist => (
+            <li key={playlist.id}>
+              <Link 
+                to={`/playlist/${playlist.id}`} 
+                className={cn(
+                  "text-sm transition-colors", 
+                  isPlaylistActive(playlist.id)
+                    ? "text-music-accent" 
+                    : "text-music-text-secondary hover:text-white"
+                )}
+              >
+                {playlist.name}
+              </Link>
+            </li>
+          ))}
         </ul>
       </div>
       
@@ -104,24 +100,24 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         <h2 className="text-sm font-bold mb-4 text-music-text-secondary uppercase">Tags</h2>
         <ul className="space-y-2">
           <li>
-            <a href="#" className="text-music-text-secondary hover:text-white text-sm transition-colors">
+            <Link to="/search?tag=upbeat" className="text-music-text-secondary hover:text-white text-sm transition-colors">
               #upbeat
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#" className="text-music-text-secondary hover:text-white text-sm transition-colors">
+            <Link to="/search?tag=relaxing" className="text-music-text-secondary hover:text-white text-sm transition-colors">
               #relaxing
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#" className="text-music-text-secondary hover:text-white text-sm transition-colors">
+            <Link to="/search?tag=workout" className="text-music-text-secondary hover:text-white text-sm transition-colors">
               #workout
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#" className="text-music-text-secondary hover:text-white text-sm transition-colors">
+            <Link to="/search?tag=focus" className="text-music-text-secondary hover:text-white text-sm transition-colors">
               #focus
-            </a>
+            </Link>
           </li>
         </ul>
       </div>

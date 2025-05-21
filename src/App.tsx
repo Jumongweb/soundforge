@@ -14,6 +14,7 @@ import Home from "./pages/Home";
 import Search from "./pages/Search";
 import Library from "./pages/Library";
 import NotFound from "./pages/NotFound";
+import PlaylistPage from "./pages/PlaylistPage";
 
 const queryClient = new QueryClient();
 
@@ -47,8 +48,9 @@ const App = () => {
             <main className="ml-64">
               <Routes>
                 <Route path="/" element={<Home onTrackSelect={handleTrackSelect} />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/library" element={<Library />} />
+                <Route path="/search" element={<Search onTrackSelect={handleTrackSelect} />} />
+                <Route path="/library" element={<Library onTrackSelect={handleTrackSelect} />} />
+                <Route path="/playlist/:playlistId" element={<PlaylistPage onTrackSelect={handleTrackSelect} />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

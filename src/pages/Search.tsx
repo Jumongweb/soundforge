@@ -9,8 +9,13 @@ import { getAllTracks, Track } from '@/services/musicService';
 import { useToast } from '@/components/ui/use-toast';
 import OnlineTrackList from '@/components/OnlineTrackList';
 import { useLibrary } from '@/hooks/useLibrary';
+import { useLocation } from 'react-router-dom';
 
-const Search = () => {
+interface SearchProps {
+  onTrackSelect: (track: Track) => void;
+}
+
+const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [tracks, setTracks] = useState<Track[]>([]);
   const [filteredTracks, setFilteredTracks] = useState<Track[]>([]);
@@ -22,13 +27,22 @@ const Search = () => {
   
   const { toast } = useToast();
   const { addToLibrary } = useLibrary();
+  const location = useLocation();
 
   useEffect(() => {
     // Load all tracks initially
     const allTracks = getAllTracks();
     setTracks(allTracks);
     setFilteredTracks(allTracks);
-  }, []);
+    
+    // Check if there's a tag in the URL
+    const queryParams = new URLSearchParams(location.search);
+    const tagParam = queryParams.get('tag');
+    
+    if (tagParam) {
+      setSearchQuery(`#${tagParam}`);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     // Filter tracks based on search query
@@ -38,6 +52,17 @@ const Search = () => {
     }
 
     const query = searchQuery.toLowerCase();
+    // Check if searching by tag (starts with #)
+    if (query.startsWith('#')) {
+      const tag = query.substring(1); // Remove # prefix
+      const filtered = tracks.filter(track => 
+        track.tags.some(trackTag => trackTag.toLowerCase().includes(tag))
+      );
+      setFilteredTracks(filtered);
+      return;
+    }
+
+    // Normal search
     const filtered = tracks.filter(track => 
       track.title.toLowerCase().includes(query) ||
       track.artist.toLowerCase().includes(query) ||
@@ -52,6 +77,7 @@ const Search = () => {
   const handleTrackSelect = (track: Track) => {
     setCurrentTrack(track);
     setIsPlaying(true);
+    onTrackSelect(track);
   };
 
   const handlePlayPause = () => {
@@ -74,7 +100,7 @@ const Search = () => {
       // These would come from an external API in a real app
       const sampleOnlineTracks: Track[] = [
         {
-          id: 'online-1',
+          id: `online-1-${Date.now()}`,
           title: `${searchQuery} - Online Track 1`,
           artist: 'Online Artist 1',
           album: 'Online Album',
@@ -85,13 +111,24 @@ const Search = () => {
           genre: 'Mixed'
         },
         {
-          id: 'online-2',
+          id: `online-2-${Date.now()}`,
           title: `${searchQuery} - Online Track 2`,
           artist: 'Online Artist 2',
           album: 'Streaming Collection',
           cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600',
           audio: 'https://assets.mixkit.co/music/preview/mixkit-jazzy-intro-171.mp3',
           duration: 220,
+          tags: ['online', 'streaming'],
+          genre: 'Mixed'
+        },
+        {
+          id: `online-3-${Date.now()}`,
+          title: `${searchQuery} - Online Track 3`,
+          artist: 'Online Artist 3',
+          album: 'Digital Beats',
+          cover: 'https://images.unsplash.com/photo-1558369178-6556d97855d0?w=600',
+          audio: 'https://assets.mixkit.co/music/preview/mixkit-hip-hop-02-621.mp3',
+          duration: 195,
           tags: ['online', 'streaming'],
           genre: 'Mixed'
         }

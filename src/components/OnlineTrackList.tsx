@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Play, Pause, Music, Download } from 'lucide-react';
+import { Play, Pause, Music, Download, Wifi } from 'lucide-react';
 import { formatTime } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
