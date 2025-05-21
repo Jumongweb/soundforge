@@ -23,6 +23,7 @@ interface TrackListProps {
   isPlaying: boolean;
   onTrackSelect: (track: Track) => void;
   onPlayPause: () => void;
+  rightAction?: (track: Track) => React.ReactNode; // Added this prop
 }
 
 const TrackList: React.FC<TrackListProps> = ({
@@ -30,7 +31,8 @@ const TrackList: React.FC<TrackListProps> = ({
   currentTrack,
   isPlaying,
   onTrackSelect,
-  onPlayPause
+  onPlayPause,
+  rightAction
 }) => {
   const handleTrackClick = (track: Track) => {
     if (currentTrack?.id === track.id) {
@@ -50,6 +52,7 @@ const TrackList: React.FC<TrackListProps> = ({
             <th className="pb-3">ALBUM</th>
             <th className="pb-3">GENRE</th>
             <th className="pb-3 pr-4 text-right">DURATION</th>
+            {rightAction && <th className="pb-3"></th>} {/* Add an extra column if rightAction exists */}
           </tr>
         </thead>
         <tbody>
@@ -104,6 +107,14 @@ const TrackList: React.FC<TrackListProps> = ({
                 <td className="py-3 pr-4 text-right text-sm text-music-text-secondary">
                   {formatTime(track.duration)}
                 </td>
+                {rightAction && (
+                  <td 
+                    className="py-3 pl-2" 
+                    onClick={(e) => e.stopPropagation()} // Prevent row click event
+                  >
+                    {rightAction(track)}
+                  </td>
+                )}
               </tr>
             );
           })}
