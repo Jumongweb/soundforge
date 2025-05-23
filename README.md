@@ -40,8 +40,8 @@ MeloMix is a modern web-based music player application that allows users to orga
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/melomix.git
-cd melomix
+git clone https://github.com/yourusername/soundforge.git
+cd soundforge
 ```
 
 2. Install dependencies:
@@ -90,3 +90,4 @@ X: @yourxhandle
 - Audio visualization options
 - Playlist sharing capabilities
 - Integration with music streaming services
+# soundforge
