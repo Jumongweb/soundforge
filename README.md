@@ -19,7 +19,7 @@ MeloMix is a modern web-based music player application that allows users to orga
 
 ## Demo
 
-[Insert video demo link here]
+[To be added later]
 
 ## Technologies Used
 
