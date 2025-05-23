@@ -1,16 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
-import { Search as SearchIcon, Download, Wifi } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import TrackList from '@/components/TrackList';
 import { getAllTracks, Track } from '@/services/musicService';
 import { useToast } from '@/components/ui/use-toast';
-import OnlineTrackList from '@/components/OnlineTrackList';
 import { useLibrary } from '@/hooks/useLibrary';
 import { useLocation } from 'react-router-dom';
 import { fetchJamendoTracks } from '@/services/jamendoService';
+import { getRecommendedTracks, analyzeUserPreferences } from '@/services/recommendationService';
+
+// Components
+import SearchBar from '@/components/SearchBar';
+import LocalSearchResults from '@/components/LocalSearchResults';
+import OnlineSearchResults from '@/components/OnlineSearchResults';
+import RecommendationSection from '@/components/RecommendationSection';
 
 interface SearchProps {
   onTrackSelect: (track: Track) => void;
@@ -25,9 +26,10 @@ const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [onlineTracks, setOnlineTracks] = useState<Track[]>([]);
   const [activeTab, setActiveTab] = useState<string>('local');
+  const [recommendedTracks, setRecommendedTracks] = useState<Track[]>([]);
   
   const { toast } = useToast();
-  const { addToLibrary } = useLibrary();
+  const { addToLibrary, libraryTracks } = useLibrary();
   const location = useLocation();
 
   useEffect(() => {
@@ -43,6 +45,11 @@ const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
     if (tagParam) {
       setSearchQuery(`#${tagParam}`);
     }
+    
+    // Generate AI recommendations based on library
+    const userPreferences = analyzeUserPreferences(allTracks);
+    const recommendations = getRecommendedTracks(userPreferences, allTracks);
+    setRecommendedTracks(recommendations);
   }, [location.search]);
 
   useEffect(() => {
@@ -213,27 +220,24 @@ const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Search Music</h1>
         
-        <div className="flex gap-2 mb-8">
-          <div className="relative flex-1">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-music-text-secondary" />
-            <Input
-              type="text"
-              placeholder="Search by title, artist, album, genre or tag..."
-              className="pl-10 bg-music-dark-alt border-music-accent/30 focus:border-music-accent"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <Button 
-            variant="outline" 
-            className="bg-music-accent hover:bg-music-accent-hover text-white border-none"
-            onClick={handleOnlineSearch}
-            disabled={isSearching}
-          >
-            <Wifi className="mr-2" />
-            {isSearching ? 'Searching...' : 'Search Online'}
-          </Button>
+        <SearchBar 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          onOnlineSearch={handleOnlineSearch}
+          isSearching={isSearching}
+        />
+        
+        <div className="mb-4 p-3 bg-[#282828] rounded-md">
+          <p className="text-sm text-music-text-secondary">
+            <strong>Note:</strong> Jamendo API provides Creative Commons licensed music from independent artists. 
+            Popular mainstream artists may not be available. Try searching for genres like "rock", "jazz", or "ambient" instead.
+          </p>
         </div>
+        
+        <RecommendationSection 
+          tracks={recommendedTracks} 
+          onTrackSelect={handleTrackSelect} 
+        />
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
@@ -242,63 +246,28 @@ const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
           </TabsList>
           
           <TabsContent value="local">
-            {searchQuery.trim() !== '' && (
-              <p className="text-sm text-music-text-secondary mb-4">
-                Found {filteredTracks.length} results in your library for "{searchQuery}"
-              </p>
-            )}
-            
-            {filteredTracks.length > 0 ? (
-              <TrackList
-                tracks={filteredTracks}
-                currentTrack={currentTrack}
-                isPlaying={isPlaying}
-                onTrackSelect={handleTrackSelect}
-                onPlayPause={handlePlayPause}
-              />
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-music-text-secondary">No tracks found matching your search.</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4 bg-music-accent hover:bg-music-accent-hover text-white border-none"
-                  onClick={handleOnlineSearch}
-                >
-                  <Wifi className="mr-2" />
-                  Search Online Instead
-                </Button>
-              </div>
-            )}
+            <LocalSearchResults
+              filteredTracks={filteredTracks}
+              searchQuery={searchQuery}
+              currentTrack={currentTrack}
+              isPlaying={isPlaying}
+              onTrackSelect={handleTrackSelect}
+              onPlayPause={handlePlayPause}
+              onOnlineSearch={handleOnlineSearch}
+            />
           </TabsContent>
           
           <TabsContent value="online">
-            {isSearching ? (
-              <div className="text-center py-12">
-                <p className="text-music-text-secondary mb-2">Searching online for "{searchQuery}"...</p>
-                <div className="w-8 h-8 border-t-2 border-music-accent rounded-full animate-spin mx-auto"></div>
-              </div>
-            ) : (
-              <>
-                {onlineTracks.length > 0 ? (
-                  <OnlineTrackList
-                    tracks={onlineTracks}
-                    currentTrack={currentTrack}
-                    isPlaying={isPlaying}
-                    onTrackSelect={handleTrackSelect}
-                    onPlayPause={handlePlayPause}
-                    onDownload={handleDownload}
-                  />
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-music-text-secondary">
-                      {searchQuery.trim() === '' 
-                        ? 'Enter a search term and click "Search Online" to find music' 
-                        : 'No online tracks found for your search.'}
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
+            <OnlineSearchResults 
+              onlineTracks={onlineTracks}
+              searchQuery={searchQuery}
+              isSearching={isSearching}
+              currentTrack={currentTrack}
+              isPlaying={isPlaying}
+              onTrackSelect={handleTrackSelect}
+              onPlayPause={handlePlayPause}
+              onDownload={handleDownload}
+            />
           </TabsContent>
         </Tabs>
       </div>

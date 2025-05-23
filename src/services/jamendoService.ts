@@ -1,4 +1,3 @@
-
 import { Track } from './musicService';
 
 const JAMENDO_CLIENT_ID = 'b1beeb33';
@@ -37,8 +36,9 @@ interface JamendoResponse {
 
 export const fetchJamendoTracks = async (query: string): Promise<Track[]> => {
   try {
-    const endpoint = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=10&search=${encodeURIComponent(query)}`;
+    const endpoint = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=20&search=${encodeURIComponent(query)}`;
     
+    console.log('Searching Jamendo with: ', endpoint);
     const response = await fetch(endpoint);
     
     if (!response.ok) {
@@ -50,6 +50,8 @@ export const fetchJamendoTracks = async (query: string): Promise<Track[]> => {
     if (data.headers.code !== 0 && data.headers.code !== 200) {
       throw new Error(`API error: ${data.headers.error_message}`);
     }
+    
+    console.log('Jamendo API response:', data);
     
     // Map Jamendo tracks to our Track interface
     return data.results.map(track => {
@@ -71,7 +73,7 @@ export const fetchJamendoTracks = async (query: string): Promise<Track[]> => {
         id: `jamendo-${track.id}`,
         title: track.name,
         artist: track.artist_name,
-        album: track.album_name,
+        album: track.album_name || 'Unknown Album',
         cover: track.image || 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600',
         audio: track.audio,
         duration: Math.round(track.duration),
