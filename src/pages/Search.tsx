@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getAllTracks, Track } from '@/services/musicService';
@@ -6,6 +7,7 @@ import { useLibrary } from '@/hooks/useLibrary';
 import { useLocation } from 'react-router-dom';
 import { fetchJamendoTracks } from '@/services/jamendoService';
 import { getRecommendedTracks, analyzeUserPreferences } from '@/services/recommendationService';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Components
 import SearchBar from '@/components/SearchBar';
@@ -29,8 +31,9 @@ const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
   const [recommendedTracks, setRecommendedTracks] = useState<Track[]>([]);
   
   const { toast } = useToast();
-  const { addToLibrary, libraryTracks } = useLibrary();
+  const { addToLibrary } = useLibrary();
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Load all tracks initially
@@ -216,9 +219,9 @@ const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
   };
 
   return (
-    <div className="pt-8 pb-28 px-8">
+    <div className={`pt-8 pb-28 ${isMobile ? 'px-4' : 'px-8'}`}>
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Search Music</h1>
+        <h1 className={`${isMobile ? 'text-2xl mt-8' : 'text-3xl'} font-bold mb-6`}>Search Music</h1>
         
         <SearchBar 
           searchQuery={searchQuery}
@@ -240,7 +243,7 @@ const Search: React.FC<SearchProps> = ({ onTrackSelect }) => {
         />
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+          <TabsList className={`grid w-full ${isMobile ? 'max-w-full' : 'max-w-md'} grid-cols-2 mb-6`}>
             <TabsTrigger value="local">My Library</TabsTrigger>
             <TabsTrigger value="online">Online Results</TabsTrigger>
           </TabsList>

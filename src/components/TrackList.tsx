@@ -4,6 +4,7 @@ import { Play, Pause, Music } from 'lucide-react';
 import { formatTime } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Track {
   id: string;
@@ -23,7 +24,7 @@ interface TrackListProps {
   isPlaying: boolean;
   onTrackSelect: (track: Track) => void;
   onPlayPause: () => void;
-  rightAction?: (track: Track) => React.ReactNode; // Added this prop
+  rightAction?: (track: Track) => React.ReactNode;
 }
 
 const TrackList: React.FC<TrackListProps> = ({
@@ -34,6 +35,8 @@ const TrackList: React.FC<TrackListProps> = ({
   onPlayPause,
   rightAction
 }) => {
+  const isMobile = useIsMobile();
+
   const handleTrackClick = (track: Track) => {
     if (currentTrack?.id === track.id) {
       onPlayPause();
@@ -42,6 +45,70 @@ const TrackList: React.FC<TrackListProps> = ({
     }
   };
 
+  // Mobile view - simplified list view
+  if (isMobile) {
+    return (
+      <div className="w-full mt-4">
+        <ul className="space-y-2">
+          {tracks.map((track, index) => {
+            const isCurrentTrack = currentTrack?.id === track.id;
+            
+            return (
+              <li 
+                key={track.id}
+                className={`flex items-center p-2 rounded-md ${isCurrentTrack ? 'bg-[#282828]' : 'hover:bg-[#282828]'}`}
+                onClick={() => handleTrackClick(track)}
+              >
+                <div className="flex-shrink-0 mr-3">
+                  <img 
+                    src={track.cover} 
+                    alt={track.title} 
+                    className="h-12 w-12 object-cover rounded-sm shadow-sm"
+                  />
+                </div>
+                <div className="flex-grow overflow-hidden mr-2">
+                  <p className={`text-sm font-medium truncate ${isCurrentTrack ? 'text-music-accent' : ''}`}>
+                    {track.title}
+                  </p>
+                  <p className="text-xs text-music-text-secondary truncate">{track.artist}</p>
+                </div>
+                <div className="flex-shrink-0 flex items-center">
+                  {isCurrentTrack && isPlaying ? (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPlayPause();
+                      }}
+                    >
+                      <Pause className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 p-0"
+                    >
+                      <Play className="h-4 w-4 ml-0.5" />
+                    </Button>
+                  )}
+                  {rightAction && (
+                    <span onClick={(e) => e.stopPropagation()}>
+                      {rightAction(track)}
+                    </span>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  }
+
+  // Desktop view - table layout
   return (
     <div className="w-full mt-6">
       <table className="w-full">
@@ -52,7 +119,7 @@ const TrackList: React.FC<TrackListProps> = ({
             <th className="pb-3">ALBUM</th>
             <th className="pb-3">GENRE</th>
             <th className="pb-3 pr-4 text-right">DURATION</th>
-            {rightAction && <th className="pb-3"></th>} {/* Add an extra column if rightAction exists */}
+            {rightAction && <th className="pb-3"></th>}
           </tr>
         </thead>
         <tbody>
@@ -110,7 +177,7 @@ const TrackList: React.FC<TrackListProps> = ({
                 {rightAction && (
                   <td 
                     className="py-3 pl-2" 
-                    onClick={(e) => e.stopPropagation()} // Prevent row click event
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {rightAction(track)}
                   </td>

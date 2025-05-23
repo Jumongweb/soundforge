@@ -4,6 +4,7 @@ import { Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import TrackList from '@/components/TrackList';
 import { Track } from '@/services/musicService';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LocalSearchResultsProps {
   filteredTracks: Track[];
@@ -24,6 +25,8 @@ const LocalSearchResults: React.FC<LocalSearchResultsProps> = ({
   onPlayPause,
   onOnlineSearch
 }) => {
+  const isMobile = useIsMobile();
+
   return (
     <>
       {searchQuery.trim() !== '' && (

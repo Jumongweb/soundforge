@@ -3,6 +3,7 @@ import React from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface VolumeControlProps {
   volume: number;
@@ -17,8 +18,10 @@ const VolumeControl: React.FC<VolumeControlProps> = ({
   onVolumeChange,
   onMuteToggle
 }) => {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="flex items-center gap-2 w-32">
+    <div className={`flex items-center gap-2 ${isMobile ? 'w-24' : 'w-32'}`}>
       <Button 
         variant="ghost" 
         size="icon" 
@@ -37,7 +40,7 @@ const VolumeControl: React.FC<VolumeControlProps> = ({
         max={1}
         step={0.01}
         onValueChange={onVolumeChange}
-        className="w-20"
+        className={isMobile ? "w-14" : "w-20"}
       />
     </div>
   );

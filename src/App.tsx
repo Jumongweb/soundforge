@@ -8,6 +8,7 @@ import Sidebar from "./components/Sidebar";
 import MusicPlayer from "./components/MusicPlayer";
 import { useState, useEffect } from "react";
 import { Track, getAllTracks } from "./services/musicService";
+import { useIsMobile } from "./hooks/use-mobile";
 
 // Pages
 import Home from "./pages/Home";
@@ -21,6 +22,8 @@ const queryClient = new QueryClient();
 const App = () => {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Initialize tracks from the music service
@@ -37,6 +40,10 @@ const App = () => {
     }
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -44,8 +51,20 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <div className="min-h-screen bg-gradient-to-b from-[#1e1e1e] to-music-dark text-white">
-            <Sidebar />
-            <main className="ml-64">
+            <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+            <main className={isMobile ? "w-full" : "ml-64"}>
+              {isMobile && (
+                <button
+                  className="fixed left-4 top-4 z-50 p-2 bg-music-dark-alt rounded-md"
+                  onClick={toggleSidebar}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                    <line x1="4" x2="20" y1="12" y2="12" />
+                    <line x1="4" x2="20" y1="6" y2="6" />
+                    <line x1="4" x2="20" y1="18" y2="18" />
+                  </svg>
+                </button>
+              )}
               <Routes>
                 <Route path="/" element={<Home onTrackSelect={handleTrackSelect} />} />
                 <Route path="/search" element={<Search onTrackSelect={handleTrackSelect} />} />

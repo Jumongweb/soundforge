@@ -2,6 +2,7 @@
 import React from 'react';
 import OnlineTrackList from '@/components/OnlineTrackList';
 import { Track } from '@/services/musicService';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface OnlineSearchResultsProps {
   onlineTracks: Track[];
@@ -24,6 +25,8 @@ const OnlineSearchResults: React.FC<OnlineSearchResultsProps> = ({
   onPlayPause,
   onDownload
 }) => {
+  const isMobile = useIsMobile();
+  
   return (
     <>
       {isSearching ? (
